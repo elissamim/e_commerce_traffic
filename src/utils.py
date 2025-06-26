@@ -45,7 +45,7 @@ def plot_contributions(df:pd.DataFrame,
 
     ax.bar(df.index,
           df[cols_contributions[1]],
-          bottom=list_past_contributions,
+          bottom=df[list_past_contributions[0]],
           label=cols_contributions[1])
     list_past_contributions.append(cols_contributions[1])
 
