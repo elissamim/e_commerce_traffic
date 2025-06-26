@@ -1,5 +1,5 @@
 from functools import reduce
-import matplotlib.pylot as plt
+import matplotlib.pyplot as plt
 import pandas as pd
 
 def average_rate(rates:list)->float:
