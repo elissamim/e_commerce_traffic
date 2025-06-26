@@ -1,4 +1,5 @@
 from functools import reduce
+import matplotlib.pylot as plt
 
 def average_rate(rates:list)->float:
     """
@@ -14,3 +15,5 @@ def average_rate(rates:list)->float:
     n = len(rates)
 
     return (reduce(lambda x,y: (1+x)*(1+y), rates)**(1/n))-1
+
+def plot_
