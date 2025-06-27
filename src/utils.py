@@ -57,7 +57,7 @@ def plot_contributions(df: pd.DataFrame,
         ax.bar(df.index,
                pos,
                bottom=bottom_pos,
-               label=col if (pos != 0).any() else None,
+               label=" ".join(col.split("_")[2:]) if (pos != 0).any() else None,
                color=color_dict[col])
         bottom_pos += pos
 
@@ -66,14 +66,14 @@ def plot_contributions(df: pd.DataFrame,
         ax.bar(df.index,
                neg,
                bottom=bottom_neg,
-               label=col if (neg < 0).all() else None,
+               label=" ".join(col.split("_")[2:]) if (neg < 0).all() else None,
                color=color_dict[col])
         bottom_neg += neg
 
     # Plot the evolution line
     ax.plot(df.index,
             df[col_evolution],
-            label=col_evolution,
+            label="Revenue evolution",
             color="black",
             linewidth=2)
 
