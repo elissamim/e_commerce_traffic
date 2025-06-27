@@ -5,6 +5,44 @@ from typing import List
 import matplotlib.cm as cm
 import matplotlib.colors as mcolors
 
+def get_ux(device:str)->str:
+    """
+    Get the UX from the device.
+
+    Args:
+        device (str): Device used for purchasing.
+
+    Returns:
+        str: UX type.
+    """
+    
+    if device in ["Android - Smartphone", "iPhone", "Mobile - Other"]:
+        return "Mobile"
+    elif device in ["Android - Tablet", "iPad"]:
+        return "Tablet"
+    elif device == "Desktop":
+        return "Desktop"
+    return "Unknown"
+
+def get_os(device:str)->str:
+    """
+    Get the OS from the device.
+
+    Args:
+        device (str): Device used for purchasing.
+
+    Returns:
+        str: OS type.
+    """
+    
+    if device.startswith("Android"):
+        return "Android"
+    elif device in ["iPhone", "iPad"]:
+        return "iOS"
+    elif device == "Desktop":
+        return "Desktop"
+    return "Unknown"
+
 def average_rate(rates:list)->float:
     """
     Returns the average rate from a list of rates.
@@ -19,7 +57,7 @@ def average_rate(rates:list)->float:
     n = len(rates)
 
     return (reduce(lambda x,y: (1+x)*(1+y), rates)**(1/n))-1
-
+    
 def plot_contributions(df: pd.DataFrame,
                        col_evolution: str,
                        cols_contributions: List[str]) -> None:
