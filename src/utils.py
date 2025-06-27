@@ -38,7 +38,7 @@ def plot_contributions(df: pd.DataFrame,
 
     plt.clf()
     plt.close("all")
-    fig, ax = plt.subplots(figsize=(8, 6))
+    fig, ax = plt.subplots(figsize=(18, 6))
 
     cmap=plt.get_cmap("Set2")
     color_dict={
@@ -82,6 +82,6 @@ def plot_contributions(df: pd.DataFrame,
     ax.set_title("Revenue monthly evolution")
     ax.set_xlabel("Date")
     ax.set_ylabel("Contributions to the revenue evolution")
-    ax.legend()
+    ax.legend(loc="center left", bbox_to_anchor=(1, .5))
     plt.tight_layout()
     plt.show()
