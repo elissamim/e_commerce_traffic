@@ -1,6 +1,9 @@
 from functools import reduce
 import matplotlib.pyplot as plt
 import pandas as pd
+from typing import List
+import matplotlib.cm as cm
+import matplotlib.colors as mcolors
 
 def average_rate(rates:list)->float:
     """
@@ -19,7 +22,7 @@ def average_rate(rates:list)->float:
 
 def plot_contributions(df: pd.DataFrame,
                        col_evolution: str,
-                       cols_contributions: list[str]) -> None:
+                       cols_contributions: List[str]) -> None:
     """
     Plots a lineplot for a given evolution and stacked bar plots for 
     different contributions, correctly handling positive and negative values.
@@ -33,7 +36,14 @@ def plot_contributions(df: pd.DataFrame,
         None.
     """
 
-    fig, ax = plt.subplots(figsize=(12, 6))
+    plt.clf()
+    plt.close("all")
+    fig, ax = plt.subplots(figsize=(8, 6))
+
+    cmap=plt.get_cmap("Set2")
+    color_dict={
+        col:cmap(i%10) for i,col in enumerate(cols_contributions)
+    }
 
     # Initialize positive and negative bottoms
     bottom_pos = pd.Series(0, index=df.index)
@@ -47,7 +57,8 @@ def plot_contributions(df: pd.DataFrame,
         ax.bar(df.index,
                pos,
                bottom=bottom_pos,
-               label=col if (pos != 0).any() else None)
+               label=col if (pos != 0).any() else None,
+               color=color_dict[col])
         bottom_pos += pos
 
         # Where values are negative
@@ -55,7 +66,8 @@ def plot_contributions(df: pd.DataFrame,
         ax.bar(df.index,
                neg,
                bottom=bottom_neg,
-               label=None)  # Hide legend for negative duplicate
+               label=col if (neg < 0).all() else None,
+               color=color_dict[col])
         bottom_neg += neg
 
     # Plot the evolution line
