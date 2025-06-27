@@ -17,12 +17,12 @@ def average_rate(rates:list)->float:
 
     return (reduce(lambda x,y: (1+x)*(1+y), rates)**(1/n))-1
 
-def plot_contributions(df:pd.DataFrame,
-                      col_evolution:str,
-                      cols_contributions:list[str]) -> None:
+def plot_contributions(df: pd.DataFrame,
+                       col_evolution: str,
+                       cols_contributions: list[str]) -> None:
     """
     Plots a lineplot for a given evolution and stacked bar plots for 
-    different contributions.
+    different contributions, correctly handling positive and negative values.
 
     Args:
         df (pd.DataFrame): DataFrame containing the whole data.
@@ -35,44 +35,41 @@ def plot_contributions(df:pd.DataFrame,
 
     fig, ax = plt.subplots(figsize=(12, 6))
 
-    # Contributions
-    list_past_contributions = []
+    # Initialize positive and negative bottoms
+    bottom_pos = pd.Series(0, index=df.index)
+    bottom_neg = pd.Series(0, index=df.index)
 
-    ax.bar(df.index,
-          df[cols_contributions[0]],
-          label=cols_contributions[0])
-    list_past_contributions.append(cols_contributions[0])
+    for col in cols_contributions:
+        values = df[col]
 
-    ax.bar(df.index,
-          df[cols_contributions[1]],
-          bottom=df[list_past_contributions[0]],
-          label=cols_contributions[1])
-    list_past_contributions.append(cols_contributions[1])
+        # Where values are positive
+        pos = values.where(values >= 0, 0)
+        ax.bar(df.index,
+               pos,
+               bottom=bottom_pos,
+               label=col if (pos != 0).any() else None)
+        bottom_pos += pos
 
-    if len(cols_contributions) > 2:
-    
-        for col in cols_contributions[2:]:
-            
-            ax.bar(df.index, 
-                   df[col],
-                   bottom=reduce(lambda x,y: df[x]+df[y],
-                                list_past_contributions),
-                   label=col)
-            list_past_contributions.append(col)
-    
-    # Evolution
-    ax.plot(df.index, 
-            df[col_evolution], 
-            label="Revenue monthly evolution", 
-            color="black", 
+        # Where values are negative
+        neg = values.where(values < 0, 0)
+        ax.bar(df.index,
+               neg,
+               bottom=bottom_neg,
+               label=None)  # Hide legend for negative duplicate
+        bottom_neg += neg
+
+    # Plot the evolution line
+    ax.plot(df.index,
+            df[col_evolution],
+            label=col_evolution,
+            color="black",
             linewidth=2)
-    
-    # Add legend and labels
+
+    # Formatting
     ax.axhline(0, color="grey", linestyle="--", linewidth=1)
     ax.set_title("Revenue monthly evolution")
     ax.set_xlabel("Date")
     ax.set_ylabel("Contributions to the revenue evolution")
     ax.legend()
-    
     plt.tight_layout()
     plt.show()
