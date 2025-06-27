@@ -1,5 +1,6 @@
 from functools import reduce
 import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
 from typing import List
 import matplotlib.cm as cm
@@ -122,3 +123,38 @@ def plot_contributions(df: pd.DataFrame,
     ax.legend(loc="center left", bbox_to_anchor=(1, .5))
     plt.tight_layout()
     plt.show()
+
+def simplify_browser(browser:str)->str:
+    """
+    Simplifies the browser name by creating groups of Browsers.
+
+    Args:
+        browser (str): Name of the browser.
+
+    Returns:
+        str: New name for the browser.
+    """
+    if np.isna(browser) or browser in ['unknown']:
+        return 'Unknown'
+    elif browser in ['chrome', 'chrome mobile', 'chrome mobile ios', 'chromium', 'comodo dragon', 'iron', 'mail.ru chromium browser']:
+        return 'Chrome'
+    elif browser in ['safari', 'mobile safari', 'mobile safari uiwebview', 'applemail']:
+        return 'Safari'
+    elif browser in ['firefox', 'firefox mobile', 'firefox ios', 'firefox beta', 'iceweasel', 
+                     'pale moon (firefox variant)', 'firefox (minefield)', 'seamonkey']:
+        return 'Firefox'
+    elif browser in ['edge', 'edge mobile', 'ie', 'ie mobile']:
+        return 'Edge/IE'
+    elif browser in ['opera', 'opera mobile', 'opera mini', 'opera tablet']:
+        return 'Opera'
+    elif browser in ['adsbot-google', 'applebot', 'bingpreview', 'phantomjs']:
+        return 'Bot/Crawler'
+    elif browser in ['facebook', 'pinterest']:
+        return 'Social In-App'
+    elif browser in ['android', 'blackberry', 'blackberry webkit', 'ovi browser', 'amazon silk']:
+        return 'Other Mobile'
+    elif browser in ['yandex browser', 'vivaldi', 'maxthon', 'lunascape', 'sleipnir',
+                     'netfront nx', 'avant', 'konqueror', 'midori', 'dolfin']:
+        return 'Alternative'
+    else:
+        return 'Alternative' 
