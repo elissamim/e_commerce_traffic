@@ -16,10 +16,9 @@ def get_ux(device:str)->str:
         str: UX type.
     """
     
-    if device in ["Android - Smartphone", "iPhone", "Mobile - Other"]:
-        return "Mobile"
-    elif device in ["Android - Tablet", "iPad"]:
-        return "Tablet"
+    if device in ["Android - Smartphone", "iPhone", "Mobile - Other",
+                 "Android - Tablet", "iPad"]:
+        return "Smartphone/Tablet"
     elif device == "Desktop":
         return "Desktop"
     return "Unknown"
