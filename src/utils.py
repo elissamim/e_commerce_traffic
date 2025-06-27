@@ -134,7 +134,7 @@ def simplify_browser(browser:str)->str:
     Returns:
         str: New name for the browser.
     """
-    if np.isna(browser) or browser in ['unknown']:
+    if browser == "" or browser in ['unknown']:
         return 'Unknown'
     elif browser in ['chrome', 'chrome mobile', 'chrome mobile ios', 'chromium', 'comodo dragon', 'iron', 'mail.ru chromium browser']:
         return 'Chrome'
