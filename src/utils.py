@@ -159,52 +159,58 @@ def simplify_browser(browser:str)->str:
     else:
         return 'Alternative' 
 
-def price_volume_effects(df:pd.DataFrame,
-                        list_products:List[str]) -> dict:
-    """
+import pandas as pd
+from typing import List
 
+def price_volume_effects(df: pd.DataFrame, list_products: List[str]) -> pd.DataFrame:
     """
-    
+    Computes a price-volume decomposition of revenue for each product and aggregates
+    them into overall effects on web traffic revenue.
+
+    Args:
+        df (pd.DataFrame): DataFrame with daily prices and quantities for each product.
+        list_products (List[str]): List of product names (suffixes in column names).
+
+    Returns:
+        pd.DataFrame: DataFrame with total volume effect, price effect, entry revenue,
+                      and exit cost across all products, indexed like the input.
+    """
     tmp = df.copy(deep=True)
 
     for product in list_products:
-        tmp[f"flag_entree_{product}"] = (
-            tmp[f"quantity_{product}"].shift(1) == 0
-        )
-        tmp[f"flag_sortie_{product}"] = (
-            tmp[f"quantity_{product}"] == 0
-        )
+        q = tmp[f"quantity_{product}"]
+        p = tmp[f"price_{product}"]
 
-        tmp[f"volume_effect_{product}"] = (
-            tmp[f"price_{product]"].shift(1)*(
-                tmp[f"volume_{product}"] - tmp[f"volume_{product}"].shift(1)
-            )
-        )
+        # Define entry/exit flags
+        flag_entry = (q.shift(1) == 0) & (q > 0)
+        flag_exit = (q == 0) & (q.shift(1) > 0)
 
-        tmp[f"price_effect_{product}"] = (
-            tmp[f"volume_{product}"]*(
-                tmp[f"price_{product}"] - tmp[f"price_{product}"].shift(1)
-            )
-        )
+        tmp[f"flag_entree_{product}"] = flag_entry
+        tmp[f"flag_sortie_{product}"] = flag_exit
 
-        mask = (~tmp[f"flag_entree_{product}"]) & (~tmp[f"flag_sortie_{product}"])
+        # Price and volume effects (masked where entry/exit occurs)
+        volume_effect = p.shift(1) * (q - q.shift(1))
+        price_effect = q * (p - p.shift(1))
+        mask = ~(flag_entry | flag_exit)
 
-        tmp[f"volume_effect_{product}"] = (
-            tmp[f"volume_effect_{product}"].where(mask, 0)
-        )
+        tmp[f"volume_effect_{product}"] = volume_effect.where(mask, 0)
+        tmp[f"price_effect_{product}"] = price_effect.where(mask, 0)
 
-        tmp[f"price_effect_{product}"] = (
-            tmp[f"price_effect_{product}"].where(mask, 0)
-        )
+        # Revenue from entries
+        tmp[f"revenue_entree_{product}"] = (p * q).where(flag_entry, 0)
 
-    tmp["volume_effect"] = (
-        tmp[[col for col in tmp.columns if col.startswith("volume_effect")]].sum(1)
-    )
+        # Cost from exits
+        tmp[f"cout_sortie_{product}"] = (-p.shift(1) * q.shift(1)).where(flag_exit, 0)
 
-    tmp["price_effect"] = (
-        tmp[[col for col in tmp.columns if col.startswith("price_effect")]].sum(1)
-    )
+    # Aggregate across all products
+    tmp["web_traffic_volume_effect"] = tmp.filter(like="volume_effect_").sum(axis=1)
+    tmp["web_traffic_price_effect"] = tmp.filter(like="price_effect_").sum(axis=1)
+    tmp["web_traffic_entry_revenue"] = tmp.filter(like="revenue_entree_").sum(axis=1)
+    tmp["web_traffic_exit_cost"] = tmp.filter(like="cout_sortie_").sum(axis=1)
 
-    return tmp
-    
-    
+    return tmp[[
+        "web_traffic_volume_effect",
+        "web_traffic_price_effect",
+        "web_traffic_entry_revenue",
+        "web_traffic_exit_cost"
+    ]].iloc[1:]  # drop first row (NaNs due to .shift)
