@@ -158,3 +158,53 @@ def simplify_browser(browser:str)->str:
         return 'Alternative'
     else:
         return 'Alternative' 
+
+def price_volume_effects(df:pd.DataFrame,
+                        list_products:List[str]) -> dict:
+    """
+
+    """
+    
+    tmp = df.copy(deep=True)
+
+    for product in list_products:
+        tmp[f"flag_entree_{product}"] = (
+            tmp[f"quantity_{product}"].shift(1) == 0
+        )
+        tmp[f"flag_sortie_{product}"] = (
+            tmp[f"quantity_{product}"] == 0
+        )
+
+        tmp[f"volume_effect_{product}"] = (
+            tmp[f"price_{product]"].shift(1)*(
+                tmp[f"volume_{product}"] - tmp[f"volume_{product}"].shift(1)
+            )
+        )
+
+        tmp[f"price_effect_{product}"] = (
+            tmp[f"volume_{product}"]*(
+                tmp[f"price_{product}"] - tmp[f"price_{product}"].shift(1)
+            )
+        )
+
+        mask = (~tmp[f"flag_entree_{product}"]) & (~tmp[f"flag_sortie_{product}"])
+
+        tmp[f"volume_effect_{product}"] = (
+            tmp[f"volume_effect_{product}"].where(mask, 0)
+        )
+
+        tmp[f"price_effect_{product}"] = (
+            tmp[f"price_effect_{product}"].where(mask, 0)
+        )
+
+    tmp["volume_effect"] = (
+        tmp[[col for col in tmp.columns if col.startswith("volume_effect")]].sum(1)
+    )
+
+    tmp["price_effect"] = (
+        tmp[[col for col in tmp.columns if col.startswith("price_effect")]].sum(1)
+    )
+
+    return tmp
+    
+    
